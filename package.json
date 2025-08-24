@@ -1,0 +1,54 @@
+{
+  "name": "vibeflex-reapsow-empire",
+  "version": "1.0.0",
+  "description": "VibeFlex Sports automated fulfillment with ReapSow zero-capital backend",
+  "main": "server/app.js",
+  "scripts": {
+    "start": "node server/app.js",
+    "dev": "nodemon server/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "setup": "npm install && echo 'Setup complete! Run npm start to begin.'",
+    "deploy": "pm2 start server/app.js --name vibeflex-reapsow",
+    "stop": "pm2 stop vibeflex-reapsow",
+    "restart": "pm2 restart vibeflex-reapsow",
+    "logs": "pm2 logs vibeflex-reapsow"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.0",
+    "firebase-admin": "^11.11.0",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.7",
+    "csv-writer": "^1.6.0",
+    "pdfkit": "^0.13.0",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "compression": "^1.7.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "pm2": "^5.3.0"
+  },
+  "keywords": [
+    "ecommerce",
+    "automation", 
+    "fulfillment",
+    "shopify",
+    "data-science",
+    "zero-capital",
+    "sports-apparel",
+    "reapsow",
+    "vibeflex"
+  ],
+  "author": "Delbert (daa25)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/daa25/vibeflex-reapsow-empire.git"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}
