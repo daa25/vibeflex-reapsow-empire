@@ -6,9 +6,10 @@ import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 import uuid
 from datetime import datetime
+from enum import Enum
 
 
 ROOT_DIR = Path(__file__).parent
@@ -20,11 +21,23 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 # Create the main app without a prefix
-app = FastAPI()
+app = FastAPI(title="Dropshipping Management API")
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
+# Define Enums
+class OrderStatus(str, Enum):
+    pending = "pending"
+    processing = "processing"
+    shipped = "shipped"
+    delivered = "delivered"
+    cancelled = "cancelled"
+
+class ProductStatus(str, Enum):
+    active = "active"
+    inactive = "inactive"
+    out_of_stock = "out_of_stock"
 
 # Define Models
 class StatusCheck(BaseModel):
@@ -34,6 +47,50 @@ class StatusCheck(BaseModel):
 
 class StatusCheckCreate(BaseModel):
     client_name: str
+
+class Product(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: str
+    price: float
+    cost: float
+    sku: str
+    supplier: str
+    supplier_product_id: Optional[str] = None
+    image_url: Optional[str] = None
+    status: ProductStatus = ProductStatus.active
+    stock_quantity: int = 0
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class ProductCreate(BaseModel):
+    name: str
+    description: str
+    price: float
+    cost: float
+    sku: str
+    supplier: str
+    supplier_product_id: Optional[str] = None
+    image_url: Optional[str] = None
+    stock_quantity: int = 0
+
+class Order(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    customer_name: str
+    customer_email: str
+    product_id: str
+    quantity: int
+    total_amount: float
+    status: OrderStatus = OrderStatus.pending
+    tracking_number: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class OrderCreate(BaseModel):
+    customer_name: str
+    customer_email: str
+    product_id: str
+    quantity: int
+    total_amount: float
 
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
