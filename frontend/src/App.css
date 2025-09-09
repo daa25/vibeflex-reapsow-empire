@@ -1,34 +1,150 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+.App {
+  text-align: left;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 6px;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
 
-.App-link {
-    color: #61dafb;
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Smooth transitions */
+* {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Form styles */
+input, textarea, select {
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  width: 100%;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Button hover effects */
+button {
+  transition: all 0.2s ease-in-out;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Card hover effects */
+.bg-white {
+  transition: all 0.2s ease-in-out;
+}
+
+.bg-white:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Table row hover */
+tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+/* Loading animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Status badge animations */
+.inline-flex {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Navigation active state */
+.bg-blue-100 {
+  position: relative;
+}
+
+.bg-blue-100::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: #3b82f6;
+  border-radius: 0 4px 4px 0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .ml-64 {
+    margin-left: 0;
+  }
+  
+  .fixed.inset-y-0.left-0 {
+    transform: translateX(-100%);
+  }
+  
+  .fixed.inset-y-0.left-0.show {
+    transform: translateX(0);
+  }
+}
+
+/* Success/Error states */
+.border-green-500 {
+  border-color: #10b981;
+}
+
+.border-red-500 {
+  border-color: #ef4444;
+}
+
+/* Dashboard grid responsive */
+@media (max-width: 640px) {
+  .grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
