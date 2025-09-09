@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -9,8 +9,7 @@ const API = `${BACKEND_URL}/api`;
 // Customer-Facing Components
 
 // Shopping Cart Context
-const CartContext = React.createContext();
-const { createContext, useContext } = React;
+const CartContext = createContext();
 
 const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
