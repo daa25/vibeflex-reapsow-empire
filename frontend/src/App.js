@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from "re
 import axios from "axios";
 import SupplierManagement from './components/SupplierManagement';
 import ImportExport from './components/ImportExport';
+import PremiumStorefront from './components/PremiumStorefront';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
