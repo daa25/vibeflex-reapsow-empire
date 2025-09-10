@@ -566,16 +566,137 @@ async def send_order_to_supplier(order: Order, supplier: dict):
     # TODO: Implement specific order submission for each supplier type
     pass
 
-# Webhook endpoints for supplier notifications
-@api_router.post("/webhooks/supplier/{supplier_id}")
-async def handle_supplier_webhook(supplier_id: str, payload: dict):
-    """Handle webhooks from suppliers for order updates"""
-    supplier = await db.suppliers.find_one({"id": supplier_id})
-    if not supplier:
-        raise HTTPException(status_code=404, detail="Supplier not found")
+# Shopify Integration Endpoints
+@api_router.get("/shopify/products")
+async def get_shopify_products():
+    """Get all products from Shopify"""
+    products = await shopify_api.get_products()
+    return {"products": products, "count": len(products)}
+
+@api_router.post("/shopify/sync-products")
+async def sync_products_to_shopify():
+    """Sync internal products to Shopify"""
+    # Get all internal products
+    products = await db.products.find().to_list(1000)
     
-    # TODO: Process webhook based on supplier type
-    return {"message": "Webhook processed"}
+    # Convert to format suitable for Shopify
+    shopify_products = []
+    for product in products:
+        shopify_products.append(Product(**product).dict())
+    
+    result = await shopify_api.sync_products_to_shopify(shopify_products)
+    return result
+
+@api_router.get("/shopify/orders")
+async def get_shopify_orders():
+    """Get all orders from Shopify"""
+    orders = await shopify_api.get_orders()
+    return {"orders": orders, "count": len(orders)}
+
+@api_router.post("/shopify/setup-webhooks")
+async def setup_shopify_webhooks():
+    """Setup Shopify webhooks for real-time sync"""
+    base_url = os.environ.get('API_BASE_URL', 'http://localhost:8001')
+    result = await shopify_api.setup_webhooks(base_url)
+    return {"webhooks_created": len(result), "results": result}
+
+# Shopify Webhook Handlers
+@api_router.post("/webhooks/shopify/orders/create")
+async def handle_shopify_order_create(request: Request):
+    """Handle new order webhook from Shopify"""
+    payload = await request.json()
+    
+    # Create internal order record
+    shopify_order = payload
+    internal_order = Order(
+        order_number=shopify_order.get('name', shopify_order.get('id')),
+        customer_name=f"{shopify_order.get('billing_address', {}).get('first_name', '')} {shopify_order.get('billing_address', {}).get('last_name', '')}",
+        customer_email=shopify_order.get('email', ''),
+        customer_phone=shopify_order.get('billing_address', {}).get('phone', ''),
+        shipping_address=shopify_order.get('shipping_address', {}),
+        product_id="", # Would need to match line items to internal products
+        supplier_id="", # Would determine from product mapping
+        quantity=sum([int(item.get('quantity', 0)) for item in shopify_order.get('line_items', [])]),
+        unit_price=float(shopify_order.get('total_price', 0)),
+        total_amount=float(shopify_order.get('total_price', 0)),
+        status=OrderStatus.pending
+    )
+    
+    await db.orders.insert_one(internal_order.dict())
+    return {"message": "Order processed", "order_id": internal_order.id}
+
+@api_router.post("/webhooks/shopify/orders/paid")
+async def handle_shopify_order_paid(request: Request):
+    """Handle order paid webhook from Shopify"""
+    payload = await request.json()
+    
+    # Update order status to processing and trigger fulfillment
+    shopify_order_id = payload.get('id')
+    order_name = payload.get('name')
+    
+    # Find and update internal order
+    result = await db.orders.update_one(
+        {"order_number": order_name},
+        {"$set": {"status": OrderStatus.processing, "updated_at": datetime.utcnow()}}
+    )
+    
+    # TODO: Trigger supplier fulfillment
+    
+    return {"message": "Order payment processed", "updated": result.modified_count > 0}
+
+# ZEncoder Integration Endpoints
+@api_router.post("/zencoder/create-hero-video")
+async def create_hero_video():
+    """Create cinematic hero video for the storefront"""
+    hero_images = [
+        "https://images.unsplash.com/photo-1577223625816-7546f13df25d",
+        "https://images.unsplash.com/photo-1671759938110-786b3ff559ef",
+        "https://images.unsplash.com/photo-1721009714209-aec1e65ce196"
+    ]
+    
+    result = await zencoder_api.create_hero_video(hero_images)
+    return result
+
+@api_router.post("/zencoder/optimize-product-images")
+async def optimize_product_images():
+    """Optimize all product images"""
+    products = await db.products.find({"image_url": {"$exists": True, "$ne": None}}).to_list(100)
+    image_urls = [p["image_url"] for p in products if p.get("image_url")]
+    
+    result = await zencoder_api.optimize_product_images(image_urls)
+    return {"optimized": len(result), "jobs": result}
+
+@api_router.post("/zencoder/create-product-video/{product_id}")
+async def create_product_video(product_id: str, template: str = "sports"):
+    """Create a video showcase for a specific product"""
+    product = await db.products.find_one({"id": product_id})
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    result = await zencoder_api.create_product_video(product, template)
+    return result
+
+@api_router.post("/zencoder/create-marketing-content")
+async def create_marketing_content(content_type: str, assets: dict):
+    """Create marketing content like social media videos"""
+    result = await zencoder_api.create_marketing_content(content_type, assets)
+    return result
+
+@api_router.post("/webhooks/zencoder/job_complete")
+async def handle_zencoder_job_complete(request: Request):
+    """Handle ZEncoder job completion webhook"""
+    payload = await request.json()
+    
+    # Store the completed job info
+    job_result = {
+        "job_id": payload.get("job", {}).get("id"),
+        "state": payload.get("job", {}).get("state"),
+        "outputs": payload.get("job", {}).get("outputs", []),
+        "completed_at": datetime.utcnow()
+    }
+    
+    await db.zencoder_jobs.insert_one(job_result)
+    return {"message": "Job completion processed"}
 
 # Include the router in the main app
 app.include_router(api_router)
