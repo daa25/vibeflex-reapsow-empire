@@ -1119,6 +1119,8 @@ function App() {
             <Route path="/admin" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
             <Route path="/admin/products" element={<DashboardLayout><Products /></DashboardLayout>} />
             <Route path="/admin/orders" element={<DashboardLayout><Orders /></DashboardLayout>} />
+            <Route path="/admin/suppliers" element={<DashboardLayout><SupplierManagement /></DashboardLayout>} />
+            <Route path="/admin/import" element={<DashboardLayout><ImportExport /></DashboardLayout>} />
             <Route path="/admin/analytics" element={<DashboardLayout><Analytics /></DashboardLayout>} />
           </Routes>
         </BrowserRouter>
