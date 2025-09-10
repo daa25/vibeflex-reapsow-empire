@@ -1109,9 +1109,10 @@ function App() {
       <div className="App">
         <BrowserRouter>
           <Routes>
-            {/* Customer-Facing Routes */}
-            <Route path="/" element={<Shop />} />
-            <Route path="/shop" element={<Shop />} />
+            {/* Customer-Facing Routes - Premium Storefront */}
+            <Route path="/" element={<PremiumStorefront />} />
+            <Route path="/shop" element={<PremiumStorefront />} />
+            <Route path="/premium" element={<PremiumStorefront />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/order-success" element={<OrderSuccess />} />
