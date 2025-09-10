@@ -606,15 +606,16 @@ const Dashboard = () => {
   const stats = [
     { name: 'Total Products', value: analytics.total_products, icon: '📦' },
     { name: 'Total Orders', value: analytics.total_orders, icon: '🛒' },
+    { name: 'Active Suppliers', value: analytics.total_suppliers, icon: '🏪' },
     { name: 'Pending Orders', value: analytics.pending_orders, icon: '⏰' },
     { name: 'Total Revenue', value: `$${analytics.total_revenue.toFixed(2)}`, icon: '💰' },
   ];
 
   return (
     <div>
-      <h2 className="text-3xl font-bold text-gray-900 mb-8">Admin Dashboard</h2>
+      <h2 className="text-3xl font-bold text-gray-900 mb-8">Multi-Supplier Dashboard</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         {stats.map((stat) => (
           <div key={stat.name} className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
@@ -628,9 +629,35 @@ const Dashboard = () => {
         ))}
       </div>
 
+      {/* Supplier Overview */}
+      <div className="bg-white rounded-lg shadow p-6 mb-8">
+        <h3 className="text-lg font-medium mb-4">Supplier Overview</h3>
+        {analytics.suppliers && analytics.suppliers.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {analytics.suppliers.map((supplier, index) => (
+              <div key={index} className="border rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-medium">{supplier.name}</h4>
+                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                    {supplier.type.replace('_', ' ')}
+                  </span>
+                </div>
+                <div className="text-sm text-gray-600">
+                  <div>Products: {supplier.products}</div>
+                  <div>Orders: {supplier.orders}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-600">No suppliers configured yet.</p>
+        )}
+      </div>
+
+      {/* Quick Actions */}
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-medium mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Link
             to="/admin/products"
             className="flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -638,14 +665,20 @@ const Dashboard = () => {
             📦 Manage Products
           </Link>
           <Link
-            to="/admin/orders"
+            to="/admin/suppliers"
             className="flex items-center justify-center px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
           >
-            🛒 View Orders
+            🏪 Manage Suppliers
+          </Link>
+          <Link
+            to="/admin/import"
+            className="flex items-center justify-center px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+          >
+            📥 Import Data
           </Link>
           <Link
             to="/shop"
-            className="flex items-center justify-center px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            className="flex items-center justify-center px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
           >
             🛍️ View Store
           </Link>
