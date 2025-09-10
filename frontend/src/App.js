@@ -688,7 +688,303 @@ const Dashboard = () => {
   );
 };
 
-// Products Component (existing - keeping the same)
+// Products Component (enhanced with supplier support)
+const Products = () => {
+  const [products, setProducts] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    price: '',
+    cost: '',
+    sku: '',
+    supplier_id: '',
+    supplier_product_id: '',
+    stock_quantity: '',
+    category: '',
+    product_type: 'physical'
+  });
+
+  useEffect(() => {
+    fetchProducts();
+    fetchSuppliers();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get(`${API}/products`);
+      setProducts(response.data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  };
+
+  const fetchSuppliers = async () => {
+    try {
+      const response = await axios.get(`${API}/suppliers`);
+      setSuppliers(response.data.filter(s => s.is_active));
+    } catch (error) {
+      console.error('Error fetching suppliers:', error);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const productData = {
+        ...formData,
+        price: parseFloat(formData.price),
+        cost: parseFloat(formData.cost),
+        stock_quantity: parseInt(formData.stock_quantity)
+      };
+
+      if (editingProduct) {
+        await axios.put(`${API}/products/${editingProduct.id}`, productData);
+      } else {
+        await axios.post(`${API}/products`, productData);
+      }
+
+      setFormData({
+        name: '', description: '', price: '', cost: '', sku: '',
+        supplier_id: '', supplier_product_id: '', stock_quantity: '',
+        category: '', product_type: 'physical'
+      });
+      setShowForm(false);
+      setEditingProduct(null);
+      fetchProducts();
+    } catch (error) {
+      console.error('Error saving product:', error);
+    }
+  };
+
+  const handleEdit = (product) => {
+    setEditingProduct(product);
+    setFormData({
+      name: product.name,
+      description: product.description,
+      price: product.price.toString(),
+      cost: product.cost.toString(),
+      sku: product.sku,
+      supplier_id: product.supplier_id,
+      supplier_product_id: product.supplier_product_id || '',
+      stock_quantity: product.stock_quantity.toString(),
+      category: product.category || '',
+      product_type: product.product_type || 'physical'
+    });
+    setShowForm(true);
+  };
+
+  const handleDelete = async (productId) => {
+    if (window.confirm('Are you sure you want to delete this product?')) {
+      try {
+        await axios.delete(`${API}/products/${productId}`);
+        fetchProducts();
+      } catch (error) {
+        console.error('Error deleting product:', error);
+      }
+    }
+  };
+
+  const getSupplierName = (supplierId) => {
+    const supplier = suppliers.find(s => s.id === supplierId);
+    return supplier ? supplier.name : 'Unknown Supplier';
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-8">
+        <h2 className="text-3xl font-bold text-gray-900">Products</h2>
+        <button
+          onClick={() => {
+            setShowForm(true);
+            setEditingProduct(null);
+            setFormData({
+              name: '', description: '', price: '', cost: '', sku: '',
+              supplier_id: '', supplier_product_id: '', stock_quantity: '',
+              category: '', product_type: 'physical'
+            });
+          }}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+        >
+          + Add Product
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="bg-white rounded-lg shadow p-6 mb-8">
+          <h3 className="text-lg font-medium mb-4">
+            {editingProduct ? 'Edit Product' : 'Add New Product'}
+          </h3>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input
+              type="text"
+              placeholder="Product name"
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              className="border rounded-lg px-3 py-2"
+              required
+            />
+            <input
+              type="text"
+              placeholder="SKU"
+              value={formData.sku}
+              onChange={(e) => setFormData({...formData, sku: e.target.value})}
+              className="border rounded-lg px-3 py-2"
+              required
+            />
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Price"
+              value={formData.price}
+              onChange={(e) => setFormData({...formData, price: e.target.value})}
+              className="border rounded-lg px-3 py-2"
+              required
+            />
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Cost"
+              value={formData.cost}
+              onChange={(e) => setFormData({...formData, cost: e.target.value})}
+              className="border rounded-lg px-3 py-2"
+              required
+            />
+            <select
+              value={formData.supplier_id}
+              onChange={(e) => setFormData({...formData, supplier_id: e.target.value})}
+              className="border rounded-lg px-3 py-2"
+              required
+            >
+              <option value="">Select Supplier</option>
+              {suppliers.map((supplier) => (
+                <option key={supplier.id} value={supplier.id}>{supplier.name}</option>
+              ))}
+            </select>
+            <input
+              type="text"
+              placeholder="Supplier Product ID"
+              value={formData.supplier_product_id}
+              onChange={(e) => setFormData({...formData, supplier_product_id: e.target.value})}
+              className="border rounded-lg px-3 py-2"
+            />
+            <input
+              type="number"
+              placeholder="Stock quantity"
+              value={formData.stock_quantity}
+              onChange={(e) => setFormData({...formData, stock_quantity: e.target.value})}
+              className="border rounded-lg px-3 py-2"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Category"
+              value={formData.category}
+              onChange={(e) => setFormData({...formData, category: e.target.value})}
+              className="border rounded-lg px-3 py-2"
+            />
+            <select
+              value={formData.product_type}
+              onChange={(e) => setFormData({...formData, product_type: e.target.value})}
+              className="border rounded-lg px-3 py-2"
+            >
+              <option value="physical">Physical Product</option>
+              <option value="print_on_demand">Print on Demand</option>
+              <option value="affiliate">Affiliate Product</option>
+              <option value="digital">Digital Product</option>
+            </select>
+            <textarea
+              placeholder="Description"
+              value={formData.description}
+              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              className="border rounded-lg px-3 py-2 md:col-span-2"
+              rows={3}
+              required
+            />
+            <div className="md:col-span-2 flex gap-2">
+              <button
+                type="submit"
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+              >
+                {editingProduct ? 'Update' : 'Add'} Product
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {products.map((product) => (
+              <tr key={product.id}>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                    <div className="text-sm text-gray-500">{product.sku}</div>
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  ${product.price.toFixed(2)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {product.stock_quantity}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {getSupplierName(product.supplier_id)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                    {product.product_type || 'physical'}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <button
+                    onClick={() => handleEdit(product)}
+                    className="text-blue-600 hover:text-blue-900 mr-3"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(product.id)}
+                    className="text-red-600 hover:text-red-900"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {products.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            No products found. Add your first product to get started!
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [showForm, setShowForm] = useState(false);
