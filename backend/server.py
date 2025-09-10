@@ -25,8 +25,12 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
+# Initialize integrations
+shopify_api = ShopifyAPI()
+zencoder_api = ZEncoderAPI()
+
 # Create the main app without a prefix
-app = FastAPI(title="Multi-Supplier Dropshipping Management API")
+app = FastAPI(title="TampaBay Merch Pro - Multi-Supplier & Shopify Integration API")
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
