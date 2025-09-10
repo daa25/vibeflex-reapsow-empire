@@ -532,6 +532,8 @@ const DashboardLayout = ({ children }) => {
     { name: 'Dashboard', href: '/admin', icon: '📊' },
     { name: 'Products', href: '/admin/products', icon: '📦' },
     { name: 'Orders', href: '/admin/orders', icon: '🛒' },
+    { name: 'Suppliers', href: '/admin/suppliers', icon: '🏪' },
+    { name: 'Import/Export', href: '/admin/import', icon: '📥' },
     { name: 'Analytics', href: '/admin/analytics', icon: '📈' },
   ];
 
