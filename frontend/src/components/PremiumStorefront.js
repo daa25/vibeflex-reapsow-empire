@@ -1,8 +1,50 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useCart } from '../App';
+import React, { useState, useEffect, useRef, useContext, createContext } from 'react';
+import axios from 'axios';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+
+// Create cart context for this component
+const PremiumCartContext = createContext();
+
+const PremiumCartProvider = ({ children }) => {
+  const [cartItems, setCartItems] = useState([]);
+
+  const addToCart = (product, quantity = 1) => {
+    setCartItems(prev => {
+      const existing = prev.find(item => item.id === product.id);
+      if (existing) {
+        return prev.map(item =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        );
+      }
+      return [...prev, { ...product, quantity }];
+    });
+  };
+
+  const getTotalItems = () => {
+    return cartItems.reduce((total, item) => total + item.quantity, 0);
+  };
+
+  return (
+    <PremiumCartContext.Provider value={{ cartItems, addToCart, getTotalItems }}>
+      {children}
+    </PremiumCartContext.Provider>
+  );
+};
+
+const usePremiumCart = () => {
+  const context = useContext(PremiumCartContext);
+  if (!context) {
+    throw new Error('usePremiumCart must be used within PremiumCartProvider');
+  }
+  return context;
+};
 
 const PremiumStorefront = () => {
-  const { addToCart } = useCart();
+  const { addToCart } = usePremiumCart();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('all');
