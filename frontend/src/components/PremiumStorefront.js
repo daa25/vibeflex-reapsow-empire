@@ -396,4 +396,12 @@ const PremiumStorefront = () => {
   );
 };
 
-export default PremiumStorefront;
+const PremiumStorefrontWithProvider = () => {
+  return (
+    <PremiumCartProvider>
+      <PremiumStorefront />
+    </PremiumCartProvider>
+  );
+};
+
+export default PremiumStorefrontWithProvider;
