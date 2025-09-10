@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, APIRouter
+from fastapi import FastAPI, HTTPException, APIRouter, Request
 from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field
@@ -11,6 +11,11 @@ from pathlib import Path
 from dotenv import load_dotenv
 import aiohttp
 import asyncio
+import json
+
+# Import custom integrations
+from integrations.shopify_api import ShopifyAPI
+from integrations.zencoder_api import ZEncoderAPI
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
