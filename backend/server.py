@@ -186,7 +186,16 @@ app.add_middleware(
 # Status Check Endpoints (existing)
 @api_router.get("/")
 async def root():
-    return {"message": "Multi-Supplier Dropshipping Management API", "version": "2.0.0"}
+    return {
+        "message": "TampaBay Merch Pro - World-Class E-commerce API", 
+        "version": "3.0.0",
+        "features": [
+            "Multi-Supplier Integration",
+            "Shopify Sync",
+            "ZEncoder Video Processing",
+            "Premium Customer Experience"
+        ]
+    }
 
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
